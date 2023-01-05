@@ -101,6 +101,29 @@ func checkOutBook(c *gin.Context) {
 
 }
 
+// return book
+func returnBook(c *gin.Context) {
+	//get id of book from the query
+	id, ok := c.GetQuery("id")
+
+	//check if id exists or not
+	if !ok {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Book id does not exist."})
+		return
+	}
+
+	book, err := getBookById(id)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Book not found."})
+		return
+	}
+
+	book.Quantity += 1
+
+	c.IndentedJSON(http.StatusOK, book)
+}
+
 func main() {
 	//step up router for handling endpoints
 	//create router to handle different routes
@@ -109,6 +132,7 @@ func main() {
 	router.GET("/books/:id", bookById)
 	router.POST("/books", createBook)
 	router.PATCH("/checkout", checkOutBook)
+	router.PATCH("/return", returnBook)
 	//run webserver
 	router.Run("localhost:8080")
 }
